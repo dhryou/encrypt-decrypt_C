@@ -2,6 +2,7 @@
 
 ## About
 This program (designed in C) allows you to encrypt and decrypt .txt files.
+
 *Not included in this version: Allowing the program to also encrypt and decrypt your passwords, similar to Google's "suggested password" feature via a non-random pattern, except that if you forget your encrypted password, you can encrypt for the same value, or find out the original password you had intended via decryption.
 
 ## How To
