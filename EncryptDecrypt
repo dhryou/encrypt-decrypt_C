@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+long long int hash_code = 0;
+
+int menu(){
+    int select;
+    do{
+        system("cls");
+        puts("===== File/PW Encryption & Decryption Software =====");
+        puts("=========       Developer: Tony Ryou          =========\n");
+        puts("  1. File Encryption ");
+        puts("  2. File Decryption ");
+        //puts("  3. PW Encryption ");
+        //puts("  4. PW Decryption ");
+        puts("  3. Exit Program \n");
+        printf("Input: ");
+        scanf("%d", &select);
+    }
+    while(select>5 || select<1);
+    puts("");
+    return select;
+}
+
+void file_encrypt(){
+    char origin; int i;
+    char file_name[50] = {'\0'};
+    char file_fullname[100] = ".\\";
+    char file_extension[8] = ".txt";
+    char pw[8] = {'\0'};
+    int after = 0;
+    char ascii[127] = {'\0'};
+    for(i=0; i<127; i++){ascii[i] = i;}
+
+    printf("Name of txt file to encrypt: ");
+    scanf("%s", file_name);
+
+    strcat(file_fullname, file_name);
+    strcat(file_fullname, file_extension);
+    printf("%s\n", file_fullname);
+
+    FILE* fp=fopen(file_fullname, "r+");
+    if (fp==NULL){puts("Failed to read file."); getch(); return 0;}
+    i = 0; hash_code = 0;
+    puts("\n---");
+    while(fscanf(fp, "%c", &origin) != EOF){
+        printf("%c", origin);
+        hash_code = hash_code + origin + i++;
+    }
+    FILE* hp=fopen("hash_code", "w+");
+    fprintf(hp, "%d", hash_code);
+    fclose(hp);
+
+    printf("\n---\nHash code value: %d\n\n", hash_code);
+    puts("Password: ");
+    scanf("%s", pw);
+
+    i=0;
+    fseek(fp, 0L, SEEK_SET);
+    while(fscanf(fp, "%c", &origin) != EOF){
+        if (origin == 10) {if (i==7) i=-1; i++; continue;}
+        printf("origin: %c,\t", origin);
+        after = origin + pw[i];
+        if (after>126) after = after - 95;
+        if (after>126) after = after - 95;
+        printf("pw값: %d,\tafter Value: %3d,\tencrpyted: %c\n", i, after, ascii[after]);
+
+        fseek(fp, -1L, SEEK_CUR);
+        fprintf(fp, "%c", ascii[after]);
+        fseek(fp, 0L, SEEK_CUR);
+
+        if (i==7) i=-1;
+        i++;
+    }
+    fseek(fp, 0L, SEEK_SET);
+    while(fscanf(fp, "%c", &origin) != EOF){
+        printf("%c", origin);
+    }
+    getch();
+}
+
+void file_decrypt(){
+    char encrypted_char; int i, j;
+    int original_hash_code = 0;
+    char file_name[50] = {'\0'};
+    char file_fullname[100] = ".\\";
+    char file_extension[8] = ".txt";
+    char pw[8] = {'\0'};
+    int after = 0;
+    char ascii[127] = {'\0'};
+    for(i=0; i<127; i++){ascii[i] = i;}
+
+    printf("Name of txt file to encrypt: ");
+    scanf("%s", file_name);
+
+    strcat(file_fullname, file_name);
+    strcat(file_fullname, file_extension);
+    printf("%s\n", file_fullname);
+
+    FILE* fp=fopen(file_fullname, "r+");
+    if (fp==NULL){puts("Failed to read file."); getch(); return 0;}
+
+    puts("\n---\nPassword: ");
+    scanf("%s", pw);
+
+    fseek(fp, 0L, SEEK_SET);
+    i = 0; j=0; hash_code = 0;
+    while(fscanf(fp, "%c", &encrypted_char) != EOF){
+        if (encrypted_char == 10){
+            hash_code = hash_code + 10 + j++;
+            {if (i==7) i=-1; i++; continue;}
+        }
+        after = encrypted_char - pw[i];
+        if (after<32) after = after + 95;
+        if (after<32) after = after + 95;
+        hash_code = hash_code + ascii[after] + j++;
+        if (i==7) i=-1;
+        i++;
+    }
+
+    FILE* hashfile=fopen("hash_code", "r");
+    if (hashfile==NULL){puts("Failed to read file."); getch(); return 0;}
+    fscanf(hashfile, "%d", &original_hash_code);
+    fclose(hashfile);
+
+    if (hash_code != original_hash_code){
+        printf("\n!! Password is incorrect. Please try again.");
+        getch();
+        return;
+    }
+
+    i=0;
+    fseek(fp, 0L, SEEK_SET);
+    while(fscanf(fp, "%c", &encrypted_char) != EOF){
+        if (encrypted_char == 10) {if (i==7) i=-1; i++; continue;}
+        printf("encrypted: %c,\t", encrypted_char);
+        after = encrypted_char - pw[i];
+        if (after<32) after = after + 95;
+        if (after<32) after = after + 95;
+        printf("pw value: %d,\tafter value: %3d,\tdecrypted: %c\n", i, after, ascii[after]);
+
+        fseek(fp, -1L, SEEK_CUR);
+        fprintf(fp, "%c", ascii[after]);
+        fseek(fp, 0L, SEEK_CUR);
+
+        if (i==7) i=-1;
+        i++;
+    }
+    fseek(fp, 0L, SEEK_SET);
+    i = 0; hash_code = 0;
+    puts("\n---");
+    while(fscanf(fp, "%c", &encrypted_char) != EOF){
+        printf("%c", encrypted_char);
+        hash_code = hash_code + encrypted_char + i++;
+    }
+    printf("\n---\nHash code value: %d\n", hash_code);
+    getch();
+}
+
+int main()
+{
+    int select;
+    do{
+        select = menu();
+        switch(select){
+            case 1: file_encrypt(); break;
+            case 2: file_decrypt(); break;
+            //case 3: pw_encrypt(); break;
+            //case 4: pw_decrypt(); break;
+            case 3: return 0;
+        }
+    }
+    while(select != 3);
+    return 0;
+}
