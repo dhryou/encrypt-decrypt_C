@@ -9,8 +9,7 @@ int menu(){
     int select;
     do{
         system("cls");
-        puts("===== File/PW Encryption & Decryption Software =====");
-        puts("=========       Developer: Tony Ryou          =========\n");
+        puts("===== File/PW Encryption & Decryption Software =====\n");
         puts("  1. File Encryption ");
         puts("  2. File Decryption ");
         //puts("  3. PW Encryption ");
