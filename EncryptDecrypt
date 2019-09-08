@@ -174,3 +174,5 @@ int main()
     while(select != 3);
     return 0;
 }
+
+vim: syntax=java
